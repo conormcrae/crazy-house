@@ -65,23 +65,15 @@ public:
 	King();
 };
 
-/**
-class Square
-{
-public:
-	Square();
-
-private:
-	Piece* piece;
-	std::string rank;
-	std::string file;
-};
-*/
-
 class Board
 {
 public:
 	Board();
+	Board(const Board& b);
+	Board& operator = (Board copy);
+	//~Board();
+
+	friend void swap(Board& left, Board& right);
 
 private:
 	Piece* board[8][8];
