@@ -3,9 +3,11 @@
 
 #include <string>
 
-class piece
+class Piece
 {
 public:
+	Piece();
+	Piece(std::string name, double val);
 	void toggle_color();
 	std::string get_lettter();
 
@@ -15,60 +17,74 @@ private:
 	double value;
 };
 
-class empty : public piece
+class Empty : public Piece
 {
 
 };
 
-class pawn : public piece
+class Pawn : public Piece
 {
+
+public:
+	Pawn();
+};
+
+class Bishop : public Piece
+{
+
+public:
+	Bishop();
+};
+
+class Knight : public Piece
+{
+
+public:
+	Knight();
+};
+
+class Rook : public Piece
+{
+
+public:
+	Rook();
+};
+
+class Queen : public Piece
+{
+
+public:
+	Queen();
 
 };
 
-class bishop : public piece
+class King : public Piece
 {
 
+public:
+	King();
 };
 
-class knight : public piece
-{
-
-};
-
-class rook : public piece
-{
-
-};
-
-class queen : public piece
-{
-
-};
-
-class king : public piece
-{
-
-};
-
-class square
+/**
+class Square
 {
 public:
-
+	Square();
 
 private:
-	piece* piece;
-	int rank;
-	int file;
+	Piece* piece;
+	std::string rank;
+	std::string file;
 };
+*/
 
-
-class board
+class Board
 {
 public:
-
+	Board();
 
 private:
-	square array[8][8];
+	Piece* board[8][8];
 	double score;
 	bool white2move;
 };
