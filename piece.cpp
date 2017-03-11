@@ -140,3 +140,66 @@ Board::~Board()
 	delete[] board;
 }
 */
+
+void Board::set_score()
+{
+	double score = 0.0;
+
+		// the following nested for loop updates the score based strictly on material balance
+	for (int i = 0; i < 8; ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+			switch (board[i][j]->first)
+			{
+			case Piece::pawn:
+				if (board[i][j]->second == Color::white)
+					score += 1.0;
+				else
+					score -= 1.0;
+			case Piece::bishop:
+				if (board[i][j]->second == Color::white)
+					score += 3.0;
+				else
+					score -= 3.0;
+			case Piece::knight:
+				if (board[i][j]->second == Color::white)
+					score += 3.0;
+				else
+					score -= 3.0;
+			case Piece::rook:
+				if (board[i][j]->second == Color::white)
+					score += 5.0;
+				else
+					score -= 5.0;
+			case Piece::queen:
+				if (board[i][j]->second == Color::white)
+					score += 9.0;
+				else
+					score -= 9.0;
+			default:
+				break;
+			}
+		}
+	}
+
+
+	// add code here to update score based on king safety, piece mobility, etc.
+
+	this->score = score;
+}
+
+double Board::get_score()
+{
+	return score;
+}
+
+bool Board::get_move_color()
+{
+	return white2move;
+}
+
+void Board::solver()
+{
+
+}
