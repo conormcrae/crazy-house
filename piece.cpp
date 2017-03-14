@@ -33,14 +33,14 @@ Board::Board()
 	board[0][5]->first = Piece::BISHOP;
 	board[0][6]->first = Piece::KNIGHT;
 	board[0][7]->first = Piece::ROOK;
-	board[0][0]->first = Piece::PAWN;
-	board[0][1]->first = Piece::PAWN;
-	board[0][2]->first = Piece::PAWN;
-	board[0][3]->first = Piece::PAWN;
-	board[0][4]->first = Piece::PAWN;
-	board[0][5]->first = Piece::PAWN;
-	board[0][6]->first = Piece::PAWN;
-	board[0][7]->first = Piece::PAWN;
+	board[1][0]->first = Piece::PAWN;
+	board[1][1]->first = Piece::PAWN;
+	board[1][2]->first = Piece::PAWN;
+	board[1][3]->first = Piece::PAWN;
+	board[1][4]->first = Piece::PAWN;
+	board[1][5]->first = Piece::PAWN;
+	board[1][6]->first = Piece::PAWN;
+	board[1][7]->first = Piece::PAWN;
 
 	board[0][0]->second = Color::WHITE;
 	board[0][1]->second = Color::WHITE;
@@ -112,13 +112,24 @@ Board::Board()
 	board[6][6]->second = Color::BLACK;
 	board[6][7]->second = Color::BLACK;
 
+		// initialize empty squares
+	for (int i = 2; i < 6; ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+			board[i][j] = new std::pair<Piece, Color>();
+			board[i][j]->first = Piece::EMPTY;
+			board[i][j]->second = Color::NO_COLOR;
+		}
+	}
+
 }
 
 Board::Board(const Board& b)
 {
 	white2move = b.white2move;
 	score = b.score;
-	std::copy(b.board, b.board + 64, board); /*error, see http://forums.codeguru.com/showthread.php?473053-RESOLVED-Trouble-with-std-fill */
+	//std::copy(b.board, b.board + 64, board); /*error, see http://forums.codeguru.com/showthread.php?473053-RESOLVED-Trouble-with-std-fill */
 }
 
 Board& Board::operator = (Board copy)
@@ -199,6 +210,42 @@ bool Board::get_move_color()
 	return white2move;
 }
 
+void Board::view()
+{
+	for (int rank = 7; rank >= 0; --rank)
+	{
+		for (int file = 0; file < 8; ++file)
+		{
+			switch (board[rank][file]->first)
+			{
+			case Piece::PAWN:
+				std::cout << "P" << " ";
+				break;
+			case Piece::BISHOP:
+				std::cout << "B" << " ";
+				break;
+			case Piece::KNIGHT:
+				std::cout << "N" << " ";
+				break;
+			case Piece::ROOK:
+				std::cout << "R" << " ";
+				break;
+			case Piece::QUEEN:
+				std::cout << "Q" << " ";
+				break;
+			case Piece::KING:
+				std::cout << "K" << " ";
+				break;
+			default:
+				std::cout << "  ";
+				break;
+			}
+		}
+
+		std::cout << "\n\n";
+	}
+}
+
 bool Board::in_check()
 {
 	int krank;
@@ -274,17 +321,136 @@ bool Board::in_check()
 	if (krank + 2 < 8 && kfile - 1 >= 0 && board[krank + 2][kfile - 1]->first == Piece::KNIGHT && board[krank + 2][kfile - 1]->second != color)
 		return true;
 
+	//see if a bishop/queen is checking the king
+	int r = krank + 1;
+	int f = kfile + 1;
+	while (r < 8 && f < 8 && board[r][f]->first == Piece::EMPTY) // assert we are within the board's dimensions and check squares along the upper-right diagonal
+	{
+		++r;
+		++f;
+	}
+	if (r < 8 && f < 8 && board[r][f]->second != color && (board[r][f]->first == Piece::BISHOP || board[r][f]->first == Piece::QUEEN)) // if first nonempty sqare is 
+		return true;
 
-	/**
+	r = krank - 1;
+	f = kfile - 1;
+	while (r >= 0 && f >= 0 && board[r][f]->first == Piece::EMPTY) // lower-left diagonal
+	{
+		--r;
+		--f;
+	}
+	if (r >= 0 && f >= 0 && board[r][f]->second != color && (board[r][f]->first == Piece::BISHOP || board[r][f]->first == Piece::QUEEN)) // if first nonempty sqare is 
+		return true;
 
-		STILL NEED bishop/queen and rook/queen
+	r = krank + 1;
+	f = kfile - 1;
+	while (r < 8 && f >= 0 && board[r][f]->first == Piece::EMPTY) // upper-left
+	{
+		++r;
+		--f;
+	}
+	if (r < 8 && f >= 0 && board[r][f]->second != color && (board[r][f]->first == Piece::BISHOP || board[r][f]->first == Piece::QUEEN)) // if first nonempty sqare is 
+		return true;
 
-	*/
-}
+	r = krank - 1;
+	f = kfile + 1;
+	while (r >= 0 && f < 8 && board[r][f]->first == Piece::EMPTY) // lower right
+	{
+		--r;
+		++f;
+	}
+	if (r >= 0 && f < 8 && board[r][f]->second != color && (board[r][f]->first == Piece::BISHOP || board[r][f]->first == Piece::QUEEN)) // if first nonempty sqare is 
+		return true;
 
-void Board::solver()
-{
+	// see if rook/queen is checking king
+	r = krank + 1;
+	f = kfile;
+	while (r < 8 && board[r][f]->first == Piece::EMPTY) // assert we are within the board's dimensions and check squares above until we get one that is nonempty
+	{
+		++r;
+	}
+	if (r < 8 && board[r][f]->second != color && (board[r][f]->first != Piece::ROOK || board[r][f]->first != Piece::QUEEN)) // first nonempty square so check if it is rook.queen of opp color
+		return true;
 
+	r = krank - 1;
+	while (r >= 0 && board[r][f]->first == Piece::EMPTY) // squares below
+	{
+		--r;
+	}
+	if (r >= 0 && board[r][f]->second != color && (board[r][f]->first != Piece::ROOK || board[r][f]->first != Piece::QUEEN)) // first nonempty square so check if it is rook.queen of opp color
+		return true;
+
+	r = krank;
+	f = kfile - 1;
+	while (f >= 0 && board[r][f]->first == Piece::EMPTY) // squares left
+	{
+		--f;
+	}
+	if (f <= 0 && board[r][f]->second != color && (board[r][f]->first != Piece::ROOK || board[r][f]->first != Piece::QUEEN))// first nonempty square so check if it is rook.queen of opp color
+		return true;
+
+	f = kfile + 1;
+	while (f >= 0 && board[r][f]->first == Piece::EMPTY) // right
+	{
+		++f;
+	}
+	if (f < 8 && board[r][f]->second != color && (board[r][f]->first != Piece::ROOK || board[r][f]->first != Piece::QUEEN)) // first nonempty square so check if it is rook.queen of opp color
+		return true;
+
+	// king v. king. This is to prevent AI from being able to move king next to player's king.
+	if (krank == 0 && kfile == 0)
+	{
+		if (board[krank + 1][kfile + 1]->first == Piece::KING || board[krank + 1][kfile]->first == Piece::KING || board[krank][kfile + 1]->first == Piece::KING)
+			return true;
+	}
+	else if (krank == 0 && kfile == 7)
+	{
+		if (board[krank + 1][kfile]->first == Piece::KING || board[krank + 1][kfile - 1]->first == Piece::KING || board[krank][kfile - 1]->first == Piece::KING)
+			return true;
+	}
+	else if (krank == 7 && kfile == 0)
+	{
+		if (board[krank - 1][kfile]->first == Piece::KING || board[krank - 1][kfile - 1]->first == Piece::KING || board[krank][kfile + 1]->first == Piece::KING)
+			return true;
+	}
+	else if (krank == 7 && kfile == 7)
+	{
+		if (board[krank - 1][kfile - 1]->first == Piece::KING || board[krank - 1][kfile]->first == Piece::KING || board[krank][kfile - 1]->first == Piece::KING)
+			return true;
+	} // king isn't in a corner
+	else if (krank == 0)
+	{
+		if (board[krank + 1][kfile + 1]->first == Piece::KING || board[krank + 1][kfile]->first == Piece::KING || board[krank + 1][kfile - 1]->first == Piece::KING
+			|| board[krank][kfile + 1]->first == Piece::KING || board[krank][kfile - 1]->first == Piece::KING)
+			return true;
+	}
+	else if (krank == 7)
+	{
+		if (board[krank][kfile + 1]->first == Piece::KING || board[krank][kfile - 1]->first == Piece::KING 
+			|| board[krank - 1][kfile + 1]->first == Piece::KING || board[krank - 1][kfile]->first == Piece::KING || board[krank - 1][kfile - 1]->first == Piece::KING)
+			return true;
+	}
+	else if (kfile == 0)
+	{
+		if (board[krank + 1][kfile]->first == Piece::KING || board[krank + 1][kfile + 1]->first == Piece::KING || board[krank][kfile + 1]->first == Piece::KING
+			|| board[krank - 1][kfile + 1]->first == Piece::KING || board[krank - 1][kfile]->first == Piece::KING)
+			return true;
+	}
+	else if (kfile == 7)
+	{
+		if (board[krank + 1][kfile]->first == Piece::KING || board[krank + 1][kfile - 1]->first == Piece::KING || board[krank][kfile - 1]->first == Piece::KING
+			|| board[krank - 1][kfile - 1]->first == Piece::KING || board[krank - 1][kfile]->first == Piece::KING)
+			return true;
+	} // king isn't on the rim
+	else if (board[krank + 1][kfile + 1]->first == Piece::KING || board[krank + 1][kfile]->first == Piece::KING || board[krank + 1][kfile - 1]->first == Piece::KING
+		|| board[krank][kfile + 1]->first == Piece::KING || board[krank][kfile - 1]->first == Piece::KING
+		|| board[krank - 1][kfile + 1]->first == Piece::KING || board[krank - 1][kfile]->first == Piece::KING || board[krank - 1][kfile - 1]->first == Piece::KING)
+	{
+		return true;
+	}
+
+
+	return false; // after all that, we aren't in check. 
 }
 
 /**
@@ -301,7 +467,7 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 	{
 
 	case Piece::PAWN:
-
+	{
 		if (board[rank][file]->second == Color::WHITE)
 		{
 			if (board[rank + 1][file]->second == Color::NO_COLOR) // checks if square in front of pawn is open
@@ -354,9 +520,9 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 					moves.push_back(std::make_pair(rank - 1, file - 1));
 			}
 		}
-
+	}
 	case Piece::BISHOP:
-
+	{
 		int r = rank + 1;
 		int f = file + 1;
 		while (r < 8 && f < 8 && board[r][f]->second != board[rank][file]->second) // assert we are within the board's dimensions and check squares along the upper-right diagonal
@@ -386,15 +552,15 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 
 		r = rank - 1;
 		f = file + 1;
-		while (r < 8 && f >= 0 && board[r][f]->second != board[rank][file]->second) // lower right
+		while (r >= 0 && f < 8 && board[r][f]->second != board[rank][file]->second) // lower right
 		{
 			moves.push_back(std::make_pair(r, f));
 			--r;
 			++f;
 		}
-
+	}
 	case Piece::KNIGHT:
-
+	{
 		if (rank + 2 < 8 && file + 1 < 8 && board[rank][file]->second != board[rank + 2][file + 1]->second)
 			moves.push_back(std::make_pair(rank + 2, file + 1));
 		if (rank + 1 < 8 && file + 2 < 8 && board[rank][file]->second != board[rank + 1][file + 2]->second)
@@ -411,9 +577,9 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 			moves.push_back(std::make_pair(rank + 1, file - 2));
 		if (rank + 2 < 8 && file - 1 >= 0 && board[rank][file]->second != board[rank + 2][file - 1]->second)
 			moves.push_back(std::make_pair(rank + 2, file - 1));
-
+	}
 	case Piece::ROOK:
-
+	{
 		int r = rank + 1;
 		int f = file;
 		while (r < 8 && board[r][f]->second != board[rank][file]->second) // assert we are within the board's dimensions and check squares above
@@ -443,9 +609,9 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 			moves.push_back(std::make_pair(r, f));
 			++f;
 		}
-
+	}
 	case Piece::QUEEN:
-
+	{
 		// bishop-type moves
 		int r = rank + 1;
 		int f = file + 1;
@@ -513,9 +679,9 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 			moves.push_back(std::make_pair(r, f));
 			++f;
 		}
-
+	}
 	case Piece::KING:
-
+	{
 		if (rank + 1 < 8 && file + 1 < 8 && board[rank + 1][file + 1]->second != board[rank][file]->second)
 			moves.push_back(std::make_pair(rank + 1, file + 1));
 		if (rank + 1 < 8 && board[rank + 1][file]->second != board[rank][file]->second)
@@ -534,11 +700,16 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 			moves.push_back(std::make_pair(rank + 1, file - 1));
 		if (rank - 1 >= 0 && file + 1 < 8 && board[rank - 1][file + 1]->second != board[rank][file]->second)
 			moves.push_back(std::make_pair(rank - 1, file + 1));
-
+	}
 	default:
 		break;
 	
 	}
 
 	return moves;
+}
+
+void Board::solver()
+{
+
 }

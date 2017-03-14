@@ -1,6 +1,7 @@
 #ifndef PIECE_H
 #define PIECE_H
 
+#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -21,6 +22,7 @@ public:
 	bool get_move_color();
 	bool in_check();
 	void solver();
+	void view();
 	std::vector<std::pair<int, int>> possible_moves(int rank, int file);
 
 	friend void swap(Board& left, Board& right);
