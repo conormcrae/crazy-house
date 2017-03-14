@@ -19,6 +19,7 @@ public:
 	void set_score();
 	double get_score();
 	bool get_move_color();
+	bool in_check();
 	void solver();
 	std::vector<std::pair<int, int>> possible_moves(int rank, int file);
 

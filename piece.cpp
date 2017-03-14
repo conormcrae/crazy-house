@@ -199,6 +199,89 @@ bool Board::get_move_color()
 	return white2move;
 }
 
+bool Board::in_check()
+{
+	int krank;
+	int kfile;
+
+	Color color = Color::BLACK;
+	if (white2move)
+		color = Color::WHITE;
+
+	for (int i = 0; i < 8; ++i) // get location of King
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+			if (board[i][j]->first == Piece::KING && board[i][j]->second == color)
+			{
+				krank = i;
+				kfile = j;
+			}
+		}
+	}
+
+	// see if a pawn is checking the king
+	if (color == Color::WHITE && krank < 6) // no way a pawn can check the white king on the 7th/8th ranks
+	{
+
+		if (kfile == 7)
+		{
+			if (board[krank + 1][kfile - 1]->first == Piece::PAWN && board[krank + 1][kfile - 1]->second == Color::BLACK)
+				return true;
+		}
+		else if (kfile == 0)
+		{
+			if (board[krank + 1][kfile + 1]->first == Piece::PAWN && board[krank + 1][kfile + 1]->second == Color::BLACK)
+				return true;
+		}
+		else if ((board[krank + 1][kfile + 1]->first == Piece::PAWN && board[krank + 1][kfile + 1]->second == Color::BLACK) || (board[krank + 1][kfile - 1]->first == Piece::PAWN && board[krank + 1][kfile - 1]->second == Color::BLACK))
+			return true;
+
+	}
+	else if (color == Color::BLACK && krank > 1)
+	{
+		
+		if (kfile == 7)
+		{
+			if (board[krank - 1][kfile - 1]->first == Piece::PAWN && board[krank - 1][kfile - 1]->second == Color::WHITE)
+				return true;
+		}
+		else if (kfile == 0)
+		{
+			if (board[krank - 1][kfile + 1]->first == Piece::PAWN && board[krank - 1][kfile + 1]->second == Color::WHITE)
+				return true;
+		}
+		else if ((board[krank - 1][kfile + 1]->first == Piece::PAWN && board[krank - 1][kfile + 1]->second == Color::WHITE) || (board[krank - 1][kfile - 1]->first == Piece::PAWN && board[krank - 1][kfile - 1]->second == Color::WHITE))
+			return true;
+
+	} 
+
+	// see if a knight is checking the King
+	if (krank + 2 < 8 && kfile + 1 < 8 && board[krank + 2][kfile + 1]->first == Piece::KNIGHT && board[krank + 2][kfile + 1]->second != color)
+		return true;
+	if (krank + 1 < 8 && kfile + 2 < 8 && board[krank + 1][kfile + 2]->first == Piece::KNIGHT && board[krank + 1][kfile + 2]->second != color)
+		return true;
+	if (krank - 1 >= 0 && kfile + 2 < 8 && board[krank - 1][kfile + 2]->first == Piece::KNIGHT && board[krank - 1][kfile + 2]->second != color)
+		return true;
+	if (krank - 2 >= 0 && kfile + 1 < 8 && board[krank - 2][kfile + 1]->first == Piece::KNIGHT && board[krank - 2][kfile + 1]->second != color)
+		return true;
+	if (krank - 2 >= 0 && kfile - 1 >= 0 && board[krank - 2][kfile - 1]->first == Piece::KNIGHT && board[krank - 2][kfile - 1]->second != color)
+		return true;
+	if (krank - 1 >= 0 && kfile - 2 >= 0 && board[krank - 1][kfile - 2]->first == Piece::KNIGHT && board[krank - 1][kfile - 2]->second != color)
+		return true;
+	if (krank + 1 < 8 && kfile - 2 >= 0 && board[krank + 1][kfile - 2]->first == Piece::KNIGHT && board[krank + 1][kfile - 2]->second != color)
+		return true;
+	if (krank + 2 < 8 && kfile - 1 >= 0 && board[krank + 2][kfile - 1]->first == Piece::KNIGHT && board[krank + 2][kfile - 1]->second != color)
+		return true;
+
+
+	/**
+
+		STILL NEED bishop/queen and rook/queen
+
+	*/
+}
+
 void Board::solver()
 {
 
@@ -316,17 +399,17 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 			moves.push_back(std::make_pair(rank + 2, file + 1));
 		if (rank + 1 < 8 && file + 2 < 8 && board[rank][file]->second != board[rank + 1][file + 2]->second)
 			moves.push_back(std::make_pair(rank + 1, file + 2));
-		if (rank - 1 < 8 && file + 2 < 8 && board[rank][file]->second != board[rank - 1][file + 2]->second)
+		if (rank - 1 >= 0 && file + 2 < 8 && board[rank][file]->second != board[rank - 1][file + 2]->second)
 			moves.push_back(std::make_pair(rank - 1, file + 2));
-		if (rank - 2 < 8 && file + 1 < 8 && board[rank][file]->second != board[rank - 2][file + 1]->second)
+		if (rank - 2 >= 0 && file + 1 < 8 && board[rank][file]->second != board[rank - 2][file + 1]->second)
 			moves.push_back(std::make_pair(rank - 2, file + 1));
-		if (rank - 2 < 8 && file - 1 < 8 && board[rank][file]->second != board[rank - 2][file - 1]->second)
+		if (rank - 2 >= 0 && file - 1 >= 0 && board[rank][file]->second != board[rank - 2][file - 1]->second)
 			moves.push_back(std::make_pair(rank - 2, file - 1));
-		if (rank - 1 < 8 && file - 2 < 8 && board[rank][file]->second != board[rank - 1][file - 2]->second)
+		if (rank - 1 >= 0 && file - 2 >= 0 && board[rank][file]->second != board[rank - 1][file - 2]->second)
 			moves.push_back(std::make_pair(rank - 1, file - 2));
-		if (rank + 1 < 8 && file - 2 < 8 && board[rank][file]->second != board[rank + 1][file - 2]->second)
+		if (rank + 1 < 8 && file - 2 >= 0 && board[rank][file]->second != board[rank + 1][file - 2]->second)
 			moves.push_back(std::make_pair(rank + 1, file - 2));
-		if (rank + 2 < 8 && file - 1 < 8 && board[rank][file]->second != board[rank + 2][file - 1]->second)
+		if (rank + 2 < 8 && file - 1 >= 0 && board[rank][file]->second != board[rank + 2][file - 1]->second)
 			moves.push_back(std::make_pair(rank + 2, file - 1));
 
 	case Piece::ROOK:
@@ -454,4 +537,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 
 	default:
 		break;
+	
+	}
+
+	return moves;
 }
