@@ -3,9 +3,10 @@
 
 #include <string>
 #include <utility>
+#include <vector>
 
-enum class Piece { empty = 0, pawn = 1, knight = 3, bishop = 4, rook = 5, queen = 9, king = INT_MAX };
-enum class Color { null = -1, white = 0, black = 1 };
+enum class Piece { EMPTY = 0, PAWN = 1, KNIGHT = 3, BISHOP = 4, ROOK = 5, QUEEN = 9, KING = INT_MAX };
+enum class Color { BLACK = -1, NO_COLOR = 0, WHITE = 1 };
 
 class Board
 {
@@ -19,6 +20,7 @@ public:
 	double get_score();
 	bool get_move_color();
 	void solver();
+	std::vector<std::pair<int, int>> possible_moves(int rank, int file);
 
 	friend void swap(Board& left, Board& right);
 
