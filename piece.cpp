@@ -213,8 +213,8 @@ double Board::set_score()
 
 
 	// The following is for testing the solver function
-	if (board[4][4]->first == Piece::PAWN && board[4][4]->second == Color::BLACK)
-		score += 121.0;
+	//if (board[4][4]->first == Piece::PAWN && board[4][4]->second == Color::BLACK)
+	//	score += 121.0;
 	// The above is for testing the solver function
 
 
@@ -241,38 +241,63 @@ void Board::toggle_move_color()
 
 void Board::view()
 {
+	std::cout << "   *********************************\n";
+
 	for (int rank = 7; rank >= 0; --rank)
 	{
+		std::wcout << " " << rank << " ";
 		for (int file = 0; file < 8; ++file)
 		{
 			switch (board[rank][file]->first)
 			{
 			case Piece::PAWN:
-				std::cout << "P" << "   ";
+				if (board[rank][file]->second == Color::WHITE)
+					std::cout << "* P ";
+				else
+					std::cout << "* p ";
 				break;
 			case Piece::BISHOP:
-				std::cout << "B" << "   ";
+				if (board[rank][file]->second == Color::WHITE)
+					std::cout << "* B ";
+				else
+					std::cout << "* b ";
 				break;
 			case Piece::KNIGHT:
-				std::cout << "N" << "   ";
+				if (board[rank][file]->second == Color::WHITE)
+					std::cout << "* N ";
+				else
+					std::cout << "* n ";
 				break;
 			case Piece::ROOK:
-				std::cout << "R" << "   ";
+				if (board[rank][file]->second == Color::WHITE)
+					std::cout << "* R ";
+				else
+					std::cout << "* r ";
 				break;
 			case Piece::QUEEN:
-				std::cout << "Q" << "   ";
+				if (board[rank][file]->second == Color::WHITE)
+					std::cout << "* Q ";
+				else
+					std::cout << "* q ";
 				break;
 			case Piece::KING:
-				std::cout << "K" << "   ";
+				if (board[rank][file]->second == Color::WHITE)
+					std::cout << "* K ";
+				else
+					std::cout << "* k ";
 				break;
 			default:
-				std::cout << "    ";
+				std::cout << "*   ";
 				break;
 			}
 		}
 
-		std::cout << "\n\n";
+		std::cout << "*\n   *********************************\n";
 	}
+
+	std::cout << "     ";
+	for (int k = 0; k < 8; ++k)
+		std::cout << k << "   ";
 }
 
 bool Board::in_check()
@@ -559,6 +584,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r < 8 && f < 8 && board[r][f]->second != board[rank][file]->second) // assert we are within the board's dimensions and check squares along the upper-right diagonal
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			++r;
 			++f;
 		}
@@ -568,6 +595,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r >= 0 && f >= 0 && board[r][f]->second != board[rank][file]->second) // lower-left diagonal
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			--r;
 			--f;
 		}
@@ -577,6 +606,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r < 8 && f >= 0 && board[r][f]->second != board[rank][file]->second) // upper-left
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			++r;
 			--f;
 		}
@@ -586,6 +617,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r >= 0 && f < 8 && board[r][f]->second != board[rank][file]->second) // lower right
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			--r;
 			++f;
 		}
@@ -620,6 +653,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r < 8 && board[r][f]->second != board[rank][file]->second) // assert we are within the board's dimensions and check squares above
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			++r;
 		}
 
@@ -627,6 +662,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r >= 0 && board[r][f]->second != board[rank][file]->second) // squares below
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			--r;
 		}
 
@@ -635,6 +672,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (f >= 0 && board[r][f]->second != board[rank][file]->second) // squares left
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			--f;
 		}
 
@@ -642,6 +681,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (f < 8 && board[r][f]->second != board[rank][file]->second) // right
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			++f;
 		}
 	}
@@ -655,6 +696,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r < 8 && f < 8 && board[r][f]->second != board[rank][file]->second) // assert we are within the board's dimensions and check squares along the upper-right diagonal
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			++r;
 			++f;
 		}
@@ -664,6 +707,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r >= 0 && f >= 0 && board[r][f]->second != board[rank][file]->second) // lower-left diagonal
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			--r;
 			--f;
 		}
@@ -673,6 +718,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r < 8 && f >= 0 && board[r][f]->second != board[rank][file]->second) // upper-left
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			++r;
 			--f;
 		}
@@ -682,6 +729,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r >= 0 && f < 8 && board[r][f]->second != board[rank][file]->second) // lower right
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			--r;
 			++f;
 		}
@@ -692,6 +741,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r < 8 && board[r][f]->second != board[rank][file]->second) // assert we are within the board's dimensions and check squares above
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			++r;
 		}
 
@@ -699,6 +750,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (r >= 0 && board[r][f]->second != board[rank][file]->second) // squares below
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			--r;
 		}
 
@@ -707,13 +760,17 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		while (f >= 0 && board[r][f]->second != board[rank][file]->second) // squares left
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			--f;
 		}
 
 		f = file + 1;
-		while (f >= 0 && board[r][f]->second != board[rank][file]->second) // right
+		while (f < 8 && board[r][f]->second != board[rank][file]->second) // right
 		{
 			moves.push_back(std::make_pair(r, f));
+			if (board[r][f]->first != Piece::EMPTY)
+				break;
 			++f;
 		}
 	}
@@ -879,7 +936,7 @@ void Board::solver(int DEPTH)
 				delete (board[iter->first][iter->second]);
 				board[iter->first][iter->second] = board[i][j]; // move piece
 				board[i][j] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
-				this->view();
+				//this->view();
 
 				int current_score = this->set_score();
 				this->toggle_move_color();
@@ -1008,4 +1065,25 @@ double Board::b_solver(int depth)
 	}
 
 	return bestval;
+}
+
+void Board::move()
+{
+	int oldrank, oldfile;
+	int newrank, newfile;
+
+	std::cout << "Enter the rank of the piece you want to move: ";
+	std::cin >> oldrank;
+	std::cout << "Enter the file of the piece you want to move: ";
+	std::cin >> oldfile;
+
+	std::cout << "Enter the rank of the destination square: ";
+	std::cin >> newrank;
+	std::cout << "Enter the file of the destination square: ";
+	std::cin >> newfile;
+
+	delete (board[newrank][newfile]);
+	board[newrank][newfile] = board[oldrank][oldfile]; // move piece
+	board[oldrank][oldfile] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
+	this->toggle_move_color();
 }

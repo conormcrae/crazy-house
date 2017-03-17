@@ -21,6 +21,7 @@ public:
 	double get_score();
 	bool get_move_color();
 	void toggle_move_color();
+	void move();
 	bool in_check();
 	void solver(int);
 	double w_solver(int);

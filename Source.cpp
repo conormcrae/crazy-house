@@ -16,11 +16,20 @@ int main()
 		std::cout << "you are NOT in check \n\n";
 
 	//b.toggle_move_color();
+	b.move();
 	b.solver(4);
-
 	b.view();
+	std::cout << "\n\n";
 
-	
+	b.move();
+	b.solver(4);
+	b.view();
+	std::cout << "\n\n";
+
+	b.move();
+	b.solver(4);
+	b.view();
+	std::cout << "\n\n";
 
 	return 0;
 }
