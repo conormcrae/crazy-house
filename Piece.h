@@ -15,13 +15,16 @@ public:
 	Board();
 	Board(const Board& b);
 	Board& operator = (Board copy);
-	//~Board();
+	~Board();
 
-	void set_score();
+	double set_score();
 	double get_score();
 	bool get_move_color();
+	void toggle_move_color();
 	bool in_check();
-	void solver();
+	void solver(int);
+	double w_solver(int);
+	double b_solver(int);
 	void view();
 	std::vector<std::pair<int, int>> possible_moves(int rank, int file);
 

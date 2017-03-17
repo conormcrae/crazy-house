@@ -145,14 +145,20 @@ void swap(Board& left, Board& right)
 	std::swap(left.white2move, right.white2move);
 }
 
-/**
+
 Board::~Board()
 {
-	delete[] board;
+	for (int i = 0; i < 8; ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+			delete board[i][j];
+		}
+	}
 }
-*/
 
-void Board::set_score()
+
+double Board::set_score()
 {
 	double score = 0.0;
 
@@ -163,31 +169,42 @@ void Board::set_score()
 		{
 			switch (board[i][j]->first)
 			{
+
 			case Piece::PAWN:
 				if (board[i][j]->second == Color::WHITE)
 					score += 1.0;
 				else
 					score -= 1.0;
+				break;
+
 			case Piece::BISHOP:
 				if (board[i][j]->second == Color::WHITE)
 					score += 3.0;
 				else
 					score -= 3.0;
+				break;
+
 			case Piece::KNIGHT:
 				if (board[i][j]->second == Color::WHITE)
 					score += 3.0;
 				else
 					score -= 3.0;
+				break;
+
 			case Piece::ROOK:
 				if (board[i][j]->second == Color::WHITE)
 					score += 5.0;
 				else
 					score -= 5.0;
+				break;
+
 			case Piece::QUEEN:
 				if (board[i][j]->second == Color::WHITE)
 					score += 9.0;
 				else
 					score -= 9.0;
+				break;
+
 			default:
 				break;
 			}
@@ -195,9 +212,16 @@ void Board::set_score()
 	}
 
 
+	// The following is for testing the solver function
+	if (board[4][4]->first == Piece::PAWN && board[4][4]->second == Color::BLACK)
+		score += 121.0;
+	// The above is for testing the solver function
+
+
 	// add code here to update score based on king safety, piece mobility, etc.
 
 	this->score = score;
+	return score;
 }
 
 double Board::get_score()
@@ -210,6 +234,11 @@ bool Board::get_move_color()
 	return white2move;
 }
 
+void Board::toggle_move_color()
+{
+	white2move = !white2move;
+}
+
 void Board::view()
 {
 	for (int rank = 7; rank >= 0; --rank)
@@ -219,25 +248,25 @@ void Board::view()
 			switch (board[rank][file]->first)
 			{
 			case Piece::PAWN:
-				std::cout << "P" << " ";
+				std::cout << "P" << "   ";
 				break;
 			case Piece::BISHOP:
-				std::cout << "B" << " ";
+				std::cout << "B" << "   ";
 				break;
 			case Piece::KNIGHT:
-				std::cout << "N" << " ";
+				std::cout << "N" << "   ";
 				break;
 			case Piece::ROOK:
-				std::cout << "R" << " ";
+				std::cout << "R" << "   ";
 				break;
 			case Piece::QUEEN:
-				std::cout << "Q" << " ";
+				std::cout << "Q" << "   ";
 				break;
 			case Piece::KING:
-				std::cout << "K" << " ";
+				std::cout << "K" << "   ";
 				break;
 			default:
-				std::cout << "  ";
+				std::cout << "    ";
 				break;
 			}
 		}
@@ -500,7 +529,7 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 				moves.push_back(std::make_pair(rank - 1, file));
 
 			if (rank == 6 && board[rank - 2][file]->second == Color::NO_COLOR && board[rank - 1][file]->second == Color::NO_COLOR) // pawn hasn't moved yet so we check for 2 space move
-				moves.push_back(std::make_pair(rank + 2, file));
+				moves.push_back(std::make_pair(rank - 2, file));
 
 			if (file == 0) // pawn is on the "a file"
 			{
@@ -521,6 +550,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 			}
 		}
 	}
+	break;
+
 	case Piece::BISHOP:
 	{
 		int r = rank + 1;
@@ -559,6 +590,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 			++f;
 		}
 	}
+	break;
+
 	case Piece::KNIGHT:
 	{
 		if (rank + 2 < 8 && file + 1 < 8 && board[rank][file]->second != board[rank + 2][file + 1]->second)
@@ -578,6 +611,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		if (rank + 2 < 8 && file - 1 >= 0 && board[rank][file]->second != board[rank + 2][file - 1]->second)
 			moves.push_back(std::make_pair(rank + 2, file - 1));
 	}
+	break;
+
 	case Piece::ROOK:
 	{
 		int r = rank + 1;
@@ -604,12 +639,14 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		}
 
 		f = file + 1;
-		while (f >= 0 && board[r][f]->second != board[rank][file]->second) // right
+		while (f < 8 && board[r][f]->second != board[rank][file]->second) // right
 		{
 			moves.push_back(std::make_pair(r, f));
 			++f;
 		}
 	}
+	break;
+
 	case Piece::QUEEN:
 	{
 		// bishop-type moves
@@ -642,7 +679,7 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 
 		r = rank - 1;
 		f = file + 1;
-		while (r < 8 && f >= 0 && board[r][f]->second != board[rank][file]->second) // lower right
+		while (r >= 0 && f < 8 && board[r][f]->second != board[rank][file]->second) // lower right
 		{
 			moves.push_back(std::make_pair(r, f));
 			--r;
@@ -680,6 +717,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 			++f;
 		}
 	}
+	break;
+
 	case Piece::KING:
 	{
 		if (rank + 1 < 8 && file + 1 < 8 && board[rank + 1][file + 1]->second != board[rank][file]->second)
@@ -701,6 +740,8 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 		if (rank - 1 >= 0 && file + 1 < 8 && board[rank - 1][file + 1]->second != board[rank][file]->second)
 			moves.push_back(std::make_pair(rank - 1, file + 1));
 	}
+	break;
+
 	default:
 		break;
 	
@@ -709,7 +750,262 @@ std::vector<std::pair<int, int>> Board::possible_moves(int rank, int file)
 	return moves;
 }
 
-void Board::solver()
+/**
+double Board::solver(int DEPTH)
 {
+	bool white_black = white2move;
+	double bestval;
+	std::pair<std::pair<int, int>, std::pair<int, int>> best_move;
+	std::vector< std::pair<int, int> >::iterator iter;
 
+	if (DEPTH == 0)
+		return this->get_score();
+
+	if (white_black)
+		bestval = -10000.0; // I know, I know...
+	else
+		bestval = 10000.0;  // ...
+
+	std::vector< std::pair<int, int> > moves;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+
+			if (white2move)
+			{
+				if (board[i][j]->first != Piece::EMPTY && board[i][j]->second == Color::WHITE)
+					moves = this->possible_moves(i, j);
+
+
+				for (iter = moves.begin(); iter != moves.end(); ++iter)
+				{
+
+					std::pair<Piece, Color> destination = std::make_pair(board[iter->first][iter->second]->first, board[iter->first][iter->second]->second); // get info on destination piece before deleting it
+					delete (board[iter->first][iter->second]);
+					board[iter->first][iter->second] = board[i][j]; // move piece
+					board[i][j] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
+
+					int current_score = this->set_score();
+					this->toggle_move_color();
+
+					double val = this->solver(DEPTH - 1);
+					if (val > bestval)
+					{
+						bestval = val;
+					}
+
+					delete (board[i][j]); // undo move
+					board[i][j] = board[iter->first][iter->second];
+					board[iter->first][iter->second] = new std::pair<Piece, Color>(std::make_pair(destination.first, destination.second));
+				}
+			}
+			else //black is to move
+			{
+				if (board[i][j]->first != Piece::EMPTY && board[i][j]->second == Color::BLACK)
+					moves = this->possible_moves(i, j);
+
+
+				for (iter = moves.begin(); iter != moves.end(); ++iter)
+				{
+
+					std::pair<Piece, Color> destination = std::make_pair(board[iter->first][iter->second]->first, board[iter->first][iter->second]->second); // get info on destination piece before deleting it
+					delete (board[iter->first][iter->second]);
+					board[iter->first][iter->second] = board[i][j]; // move piece
+					board[i][j] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
+					this->view();
+
+					int current_score = this->set_score();
+					this->toggle_move_color();
+
+					double val = this->solver(DEPTH - 1);
+					if (val < bestval)
+					{
+						bestval = val;
+						if (DEPTH == 4)
+						{
+							best_move.first.first = i;
+							best_move.first.second = j;
+							best_move.second.first = iter->first;
+							best_move.second.second = iter->second;
+						}
+					}
+
+
+					delete (board[i][j]); // undo move
+					board[i][j] = board[iter->first][iter->second];
+					board[iter->first][iter->second] = new std::pair<Piece, Color>(std::make_pair(destination.first, destination.second));
+					this->toggle_move_color();
+				}
+			}
+
+
+		}
+	}
+
+	delete (board[best_move.second.first][best_move.second.second]);
+	board[best_move.second.first][best_move.second.second] = board[best_move.first.first][best_move.first.second]; // move piece
+	board[best_move.first.first][best_move.first.second] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
+
+	return bestval;
+}
+*/
+
+void Board::solver(int DEPTH)
+{
+	double bestval;
+	std::pair<std::pair<int, int>, std::pair<int, int>> best_move;
+	std::vector< std::pair<int, int> >::iterator iter;
+
+	bestval = 10000.0;  // ...
+
+	std::vector< std::pair<int, int> > moves;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+			if (board[i][j]->first != Piece::EMPTY && board[i][j]->second == Color::BLACK)
+				moves = this->possible_moves(i, j);
+			else
+				moves = std::vector< std::pair<int, int> >(0);
+
+
+			for (iter = moves.begin(); iter != moves.end(); ++iter)
+			{
+
+				std::pair<Piece, Color> destination = std::make_pair(board[iter->first][iter->second]->first, board[iter->first][iter->second]->second); // get info on destination piece before deleting it
+				delete (board[iter->first][iter->second]);
+				board[iter->first][iter->second] = board[i][j]; // move piece
+				board[i][j] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
+				this->view();
+
+				int current_score = this->set_score();
+				this->toggle_move_color();
+
+				double val = this->w_solver(DEPTH - 1);
+				if (val < bestval && moves.size() != 0)
+				{
+					bestval = val;
+
+					best_move.first.first = i;
+					best_move.first.second = j;
+					best_move.second.first = iter->first;
+					best_move.second.second = iter->second;
+				}
+
+
+				delete (board[i][j]); // undo move
+				board[i][j] = board[iter->first][iter->second];
+				board[iter->first][iter->second] = new std::pair<Piece, Color>(std::make_pair(destination.first, destination.second));
+				this->toggle_move_color();
+			}
+		}
+	}
+
+	delete (board[best_move.second.first][best_move.second.second]);
+	board[best_move.second.first][best_move.second.second] = board[best_move.first.first][best_move.first.second]; // move piece
+	board[best_move.first.first][best_move.first.second] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
+}
+
+double Board::w_solver(int depth)
+{
+	if (depth == 0)
+		return this->set_score();
+
+	double bestval = -10000.0;
+	std::pair<std::pair<int, int>, std::pair<int, int>> best_move;
+	std::vector< std::pair<int, int> >::iterator iter;
+
+	std::vector< std::pair<int, int> > moves;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+
+			if (board[i][j]->first != Piece::EMPTY && board[i][j]->second == Color::WHITE)
+				moves = this->possible_moves(i, j);
+			else
+				moves = std::vector< std::pair<int, int> >(0);
+
+
+			for (iter = moves.begin(); iter != moves.end(); ++iter)
+			{
+
+				std::pair<Piece, Color> destination = std::make_pair(board[iter->first][iter->second]->first, board[iter->first][iter->second]->second); // get info on destination piece before deleting it
+				delete (board[iter->first][iter->second]);
+				board[iter->first][iter->second] = board[i][j]; // move piece
+				board[i][j] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
+				//this->view();
+
+				int current_score = this->set_score();
+				this->toggle_move_color();
+
+				double val = this->b_solver(depth - 1);
+				if (val > bestval && moves.size() != 0)
+				{
+					bestval = val;
+				}
+
+				delete (board[i][j]); // undo move
+				board[i][j] = board[iter->first][iter->second];
+				board[iter->first][iter->second] = new std::pair<Piece, Color>(std::make_pair(destination.first, destination.second));
+				this->toggle_move_color();
+			}
+		}
+	}
+	return bestval;
+}
+
+double Board::b_solver(int depth)
+{
+	if (depth == 0)
+		return this->set_score();
+
+	double bestval = 10000.0;
+	std::pair<std::pair<int, int>, std::pair<int, int>> best_move;
+	std::vector< std::pair<int, int> >::iterator iter;
+
+	std::vector< std::pair<int, int> > moves;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		for (int j = 0; j < 8; ++j)
+		{
+
+			if (board[i][j]->first != Piece::EMPTY && board[i][j]->second == Color::BLACK)
+				moves = this->possible_moves(i, j);
+			else
+				moves = std::vector< std::pair<int, int> >(0);
+
+
+			for (iter = moves.begin(); iter != moves.end(); ++iter)
+			{
+
+				std::pair<Piece, Color> destination = std::make_pair(board[iter->first][iter->second]->first, board[iter->first][iter->second]->second); // get info on destination piece before deleting it
+				delete (board[iter->first][iter->second]);
+				board[iter->first][iter->second] = board[i][j]; // move piece
+				board[i][j] = new std::pair<Piece, Color>(std::make_pair(Piece::EMPTY, Color::NO_COLOR)); // set previous square as empty
+				//this->view();
+
+				int current_score = this->set_score();
+				this->toggle_move_color();
+
+				double val = this->b_solver(depth - 1);
+				if (val < bestval && moves.size() != 0)
+				{
+					bestval = val;
+				}
+
+				delete (board[i][j]); // undo move
+				board[i][j] = board[iter->first][iter->second];
+				board[iter->first][iter->second] = new std::pair<Piece, Color>(std::make_pair(destination.first, destination.second));
+				this->toggle_move_color();
+			}
+		}
+	}
+
+	return bestval;
 }
