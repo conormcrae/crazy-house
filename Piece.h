@@ -23,6 +23,7 @@ public:
 	void toggle_move_color();
 	void move();
 	bool in_check();
+	bool checkmate();
 	void solver(int);
 	double w_solver(int);
 	double b_solver(int);
